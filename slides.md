@@ -80,7 +80,7 @@ Note: This is the payoff of using xarray instead of a raw array — indexing by 
 - **Missing values** — IMD grids use −999 as a fill value, not `NaN`; mask it explicitly
 - **No account needed** — IMD's grids download without any login or API key
 
-Note: The −999 gotcha is the one that silently wrecks an average — it looks like a real number until your mean rainfall comes out negative. imdlib's get_xarray() already masks it, but check before trusting a raw array.
+Note: The −999 gotcha is the one that silently wrecks an average — it looks like a real number until your mean rainfall comes out negative. Verified against a real download: get_xarray() does NOT mask it for you — millions of raw −999 cells, zero NaNs. Always run ds.where(ds != -999) (or similar) yourself before averaging.
 
 Bloom's (Evaluate): Is coding missing values as −999 a good design choice compared to using NaN directly? What does it gain, and what does it put at risk for someone who doesn't know to check?
 
