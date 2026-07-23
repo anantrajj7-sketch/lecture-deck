@@ -110,8 +110,8 @@ Bloom's (Create): Propose a rule for picking a buffer distance other than 33 km 
 
 ## Open the notebook
 
-<img src="/static/qr-colab.png" alt="QR code to open the notebook in Colab" width="260">
+<img src="/static/qr-colab.png" alt="QR code to open the notebook in Colab" width="220">
 
-colab.research.google.com/github/anantrajj7-sketch/lecture-deck
+[![Open In Colab](/static/vendor/colab-badge.svg)](https://colab.research.google.com/github/anantrajj7-sketch/lecture-deck/blob/main/imd_gridded_clip_exercise.ipynb)
 
-Note: QR points straight to "Open in Colab" for imd_gridded_clip_exercise.ipynb on GitHub — scanning it launches a ready-to-run copy, no setup needed. Full link for anyone who'd rather type it: https://colab.research.google.com/github/anantrajj7-sketch/lecture-deck/blob/main/imd_gridded_clip_exercise.ipynb
+Note: QR points straight to "Open in Colab" for imd_gridded_clip_exercise.ipynb on GitHub — scanning it launches a ready-to-run copy, no setup needed. The badge underneath is the same link, clickable — it's also pinned to the top of the notebook itself. Full URL for anyone who'd rather type it: https://colab.research.google.com/github/anantrajj7-sketch/lecture-deck/blob/main/imd_gridded_clip_exercise.ipynb
