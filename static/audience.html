@@ -20,6 +20,13 @@
 
   html, body { background: var(--ink); }
 
+  /* Reveal.js (loaded without a theme file) puts a hardcoded #fff/#000
+     default on .reveal-viewport, which it adds to <body> at runtime. A
+     class selector beats our plain `body` rule above on specificity, so
+     it must be overridden explicitly here rather than relying on the
+     rule order. */
+  .reveal-viewport { background-color: var(--ink); color: var(--chalk); }
+
   .reveal {
     font-family: 'Archivo', system-ui, sans-serif;
     font-size: 42px;
