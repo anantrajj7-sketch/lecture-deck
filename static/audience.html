@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture</title>
+
+<link rel="stylesheet" href="/static/vendor/reveal.css">
+<link rel="stylesheet" href="/static/vendor/fonts.css">
+
+<style>
+  :root {
+    --ink:        #12161c;
+    --ink-raised: #1b212a;
+    --chalk:      #e8e4da;
+    --dim:        #7d8896;
+    --amber:      #f2a93b;
+    --tally:      #ff4438;
+  }
+
+  html, body { background: var(--ink); }
+
+  .reveal {
+    font-family: 'Archivo', system-ui, sans-serif;
+    font-size: 42px;
+    color: var(--chalk);
+  }
+
+  .reveal .slides { text-align: left; }
+
+  .reveal section { padding: 0 4vw; }
+
+  .reveal h1, .reveal h2, .reveal h3 {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 500;
+    color: var(--chalk);
+    text-transform: none;
+    letter-spacing: -0.015em;
+    line-height: 1.08;
+    margin: 0 0 0.5em;
+  }
+  .reveal h1 { font-size: 2.15em; }
+  .reveal h2 { font-size: 1.62em; }
+  .reveal h3 { font-size: 1.25em; }
+
+  .reveal p { line-height: 1.45; margin: 0 0 0.7em; max-width: 20em; }
+
+  .reveal ul, .reveal ol { max-width: 21em; margin-left: 0; }
+  .reveal li { margin: 0 0 0.45em; line-height: 1.4; }
+  .reveal li::marker { color: var(--amber); }
+
+  .reveal strong { color: #fff; font-weight: 600; }
+  .reveal em { color: var(--amber); font-style: normal; }
+
+  .reveal a { color: var(--amber); text-decoration-thickness: 1px; }
+
+  .reveal code {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 0.85em;
+    background: var(--ink-raised);
+    color: var(--amber);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+  }
+  .reveal pre {
+    box-shadow: none;
+    background: var(--ink-raised);
+    border-left: 2px solid var(--amber);
+    font-size: 0.55em;
+    width: 100%;
+  }
+  .reveal pre code { background: none; color: var(--chalk); padding: 1em 1.2em; }
+
+  .reveal blockquote {
+    background: none;
+    box-shadow: none;
+    border-left: 2px solid var(--dim);
+    font-family: 'Newsreader', serif;
+    font-style: normal;
+    color: var(--dim);
+    padding-left: 1em;
+    width: auto;
+  }
+
+  .reveal table { font-size: 0.8em; }
+  .reveal table th { color: var(--amber); font-weight: 600; }
+
+  /* Progress rail — the only chrome on the projected view. */
+  .rail {
+    position: fixed;
+    left: 0; bottom: 0;
+    height: 3px;
+    background: var(--amber);
+    width: 0;
+    transition: width 380ms cubic-bezier(.2,.8,.2,1);
+    z-index: 60;
+  }
+
+  .offline {
+    position: fixed;
+    right: 18px; bottom: 16px;
+    font: 500 12px/1 'Archivo', sans-serif;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tally);
+    opacity: 0;
+    transition: opacity 200ms;
+    z-index: 60;
+  }
+  .offline.show { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rail { transition: none; }
+    .reveal .slides section { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="reveal">
+  <div class="slides"><section><h2>Connecting…</h2></section></div>
+</div>
+
+<div class="rail" id="rail"></div>
+<div class="offline" id="offline">Reconnecting</div>
+
+<script src="/static/vendor/reveal.js"></script>
+<script src="/static/vendor/marked.min.js"></script>
+<script>
+(function () {
+  const slidesEl  = document.querySelector('.reveal .slides');
+  const railEl    = document.getElementById('rail');
+  const offlineEl = document.getElementById('offline');
+
+  let count = 0;
+  let ready = false;
+
+  marked.setOptions({ breaks: false, mangle: false, headerIds: false });
+
+  function render(slides, index) {
+    slidesEl.innerHTML = slides
+      .map(s => '<section>' + marked.parse(s.markdown) + '</section>')
+      .join('');
+    count = slides.length;
+    if (ready) {
+      Reveal.sync();
+      Reveal.slide(Math.min(index, count - 1));
+    }
+  }
+
+  function goto(index) {
+    if (!ready) return;
+    Reveal.slide(index);
+    railEl.style.width = count > 1 ? (index / (count - 1)) * 100 + '%' : '100%';
+  }
+
+  // The deck is read-only here: arrow keys and swipes are disabled so a
+  // stray keypress on the lectern laptop cannot desync the room.
+  Reveal.initialize({
+    controls: false,
+    progress: false,
+    keyboard: false,
+    touch: false,
+    hash: false,
+    transition: 'fade',
+    transitionSpeed: 'fast',
+    width: 1280,
+    height: 720,
+    margin: 0.045,
+  }).then(() => { ready = true; });
+
+  let source;
+  function connect() {
+    source = new EventSource('/api/events');
+
+    source.addEventListener('init', e => {
+      const state = JSON.parse(e.data);
+      render(state.slides, state.index);
+      const settle = setInterval(() => {
+        if (!ready) return;
+        clearInterval(settle);
+        Reveal.sync();
+        goto(state.index);
+      }, 50);
+      offlineEl.classList.remove('show');
+    });
+
+    source.addEventListener('deck', e => {
+      const state = JSON.parse(e.data);
+      render(state.slides, state.index);
+      goto(state.index);
+    });
+
+    source.addEventListener('slide', e => goto(JSON.parse(e.data).index));
+
+    source.onopen  = () => offlineEl.classList.remove('show');
+    source.onerror = () => offlineEl.classList.add('show');
+  }
+
+  connect();
+})();
+</script>
+</body>
+</html>

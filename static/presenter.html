@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#12161c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Presenter</title>
+
+<link rel="stylesheet" href="/static/vendor/fonts.css">
+
+<style>
+  :root {
+    --ink:        #12161c;
+    --ink-raised: #1b212a;
+    --ink-line:   #262e39;
+    --chalk:      #e8e4da;
+    --dim:        #7d8896;
+    --dimmer:     #4d5763;
+    --amber:      #f2a93b;
+    --tally:      #ff4438;
+    --strip: 5px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--ink);
+    color: var(--chalk);
+    font-family: 'Archivo', system-ui, -apple-system, sans-serif;
+    overscroll-behavior: none;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    padding-left: var(--strip);
+    user-select: none;
+  }
+
+  /* ---- signature: the tally strip -------------------------------------- */
+  #tally {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: var(--strip);
+    background: var(--amber);
+    z-index: 20;
+    transition: background 160ms linear;
+  }
+  #tally.flash { background: var(--chalk); }
+  #tally.lost  { background: var(--tally); animation: breathe 1.1s ease-in-out infinite; }
+  @keyframes breathe { 0%,100% { opacity: 1 } 50% { opacity: .25 } }
+
+  /* ---- status row ------------------------------------------------------ */
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: calc(env(safe-area-inset-top) + 12px) 18px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .status .count { color: var(--chalk); font-variant-numeric: tabular-nums; }
+  .status .spacer { flex: 1; }
+  .status .clock {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    color: var(--dim);
+    background: none;
+    border: 0;
+    font: inherit;
+    text-transform: none;
+    padding: 4px 6px;
+    margin: -4px -6px;
+  }
+  .status .clock.over { color: var(--amber); }
+
+  /* ---- panes ----------------------------------------------------------- */
+  .panes { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dimmer);
+    margin-bottom: 8px;
+  }
+
+  .now {
+    padding: 14px 18px 16px;
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .now .title {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.25;
+    color: var(--dim);
+  }
+
+  .next { padding: 20px 18px 8px; }
+  .next .eyebrow { color: var(--amber); }
+  .next .title {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 30px;
+    line-height: 1.14;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .next .body {
+    margin-top: 12px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--dim);
+    white-space: pre-wrap;
+  }
+  .next.end .title { color: var(--dimmer); font-style: italic; }
+
+  .notes {
+    margin: 18px 18px 24px;
+    padding: 14px 16px;
+    background: var(--ink-raised);
+    border-left: 2px solid var(--amber);
+    border-radius: 0 6px 6px 0;
+    font-size: 15px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+  .notes .eyebrow { color: var(--amber); }
+  .notes:empty { display: none; }
+
+  /* ---- thumb controls -------------------------------------------------- */
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 2px;
+    background: var(--ink-line);
+    border-top: 1px solid var(--ink-line);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .controls button {
+    appearance: none;
+    border: 0;
+    background: var(--ink);
+    color: var(--chalk);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    height: 92px;
+    touch-action: manipulation;
+    transition: background 90ms;
+  }
+  .controls button:active { background: var(--ink-raised); }
+  .controls button:focus-visible { outline: 2px solid var(--amber); outline-offset: -4px; }
+  .controls .fwd { color: var(--amber); font-size: 15px; }
+  .controls button[disabled] { color: var(--dimmer); }
+
+  /* ---- jump sheet ------------------------------------------------------ */
+  .sheet {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,13,17,.94);
+    z-index: 30;
+    display: none;
+    flex-direction: column;
+    padding: calc(env(safe-area-inset-top) + 16px) 0 env(safe-area-inset-bottom);
+  }
+  .sheet.open { display: flex; }
+  .sheet ol { flex: 1; overflow-y: auto; list-style: none; margin: 0; padding: 0 12px; }
+  .sheet li button {
+    display: flex;
+    gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--ink-line);
+    color: var(--chalk);
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.3;
+    padding: 15px 8px;
+  }
+  .sheet li button .n { color: var(--dimmer); font-variant-numeric: tabular-nums; min-width: 2ch; }
+  .sheet li button.current .n { color: var(--amber); }
+  .sheet li button.current { color: var(--amber); }
+  .sheet .close {
+    margin: 10px 18px 6px;
+    background: var(--ink-raised);
+    color: var(--chalk);
+    border: 0;
+    border-radius: 6px;
+    font: 700 13px/1 'Archivo', sans-serif;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 18px;
+  }
+
+  .gate {
+    margin: auto;
+    padding: 24px;
+    max-width: 320px;
+    text-align: center;
+    color: var(--dim);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .gate code { color: var(--amber); font-family: ui-monospace, Menlo, monospace; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #tally, #tally.lost { animation: none; transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="tally"></div>
+
+<div class="status">
+  <span class="count" id="count">–/–</span>
+  <button class="clock" id="clock" type="button">00:00</button>
+  <span class="spacer"></span>
+  <span id="link">offline</span>
+</div>
+
+<div class="panes" id="panes">
+  <div class="now">
+    <div class="eyebrow">On screen now</div>
+    <div class="title" id="nowTitle">Connecting…</div>
+  </div>
+
+  <div class="next" id="nextPane">
+    <div class="eyebrow">Coming up</div>
+    <h2 class="title" id="nextTitle">—</h2>
+    <div class="body" id="nextBody"></div>
+  </div>
+
+  <div class="notes" id="notes"></div>
+</div>
+
+<div class="controls">
+  <button type="button" id="back">Back</button>
+  <button type="button" id="fwd" class="fwd">Next slide</button>
+</div>
+
+<div class="sheet" id="sheet">
+  <ol id="sheetList"></ol>
+  <button class="close" type="button" id="sheetClose">Close</button>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+
+  // ---- token: from ?t=… once, then remembered so a bookmark just works.
+  const params = new URLSearchParams(location.search);
+  let token = params.get('t');
+  if (token) {
+    localStorage.setItem('deck-token', token);
+    history.replaceState({}, '', location.pathname);
+  } else {
+    token = localStorage.getItem('deck-token');
+  }
+
+  if (!token) {
+    document.body.innerHTML =
+      '<div class="gate">This remote needs a control token.<br><br>' +
+      'Open <code>/present?t=YOUR_TOKEN</code> once and it will be remembered on this phone.</div>';
+    return;
+  }
+
+  let slides = [], index = 0, count = 0, elapsed = 0, selfMove = 0;
+
+  const tally = $('tally');
+
+  function pulse() {
+    tally.classList.add('flash');
+    setTimeout(() => tally.classList.remove('flash'), 170);
+  }
+
+  function firstLines(md) {
+    // Strip the heading — it is already the title — and show what follows.
+    const rest = md.split('\n').filter(l => !l.trim().startsWith('#')).join('\n');
+    return rest.replace(/^\s+|\s+$/g, '').slice(0, 260);
+  }
+
+  function paint() {
+    $('count').textContent = (index + 1) + '/' + count;
+
+    const now = slides[index];
+    $('nowTitle').textContent = now ? now.title : '—';
+
+    const next = slides[index + 1];
+    const pane = $('nextPane');
+    if (next) {
+      pane.classList.remove('end');
+      $('nextTitle').textContent = next.title;
+      $('nextBody').textContent = firstLines(next.markdown);
+    } else {
+      pane.classList.add('end');
+      $('nextTitle').textContent = 'End of deck';
+      $('nextBody').textContent = '';
+    }
+
+    const notes = $('notes');
+    notes.innerHTML = now && now.notes
+      ? '<div class="eyebrow">Your notes</div>' + escapeHtml(now.notes)
+      : '';
+
+    $('back').disabled = index === 0;
+    $('fwd').disabled = index >= count - 1;
+    $('panes').scrollTop = 0;
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  }
+
+  // ---- control ---------------------------------------------------------
+  async function send(body) {
+    selfMove = Date.now();
+    try {
+      const res = await fetch('/api/state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Control-Token': token },
+        body: JSON.stringify(body),
+      });
+      if (res.status === 401) {
+        localStorage.removeItem('deck-token');
+        $('link').textContent = 'bad token';
+      }
+    } catch (_) {
+      tally.classList.add('lost');
+    }
+  }
+
+  $('back').onclick = () => { pulse(); send({ delta: -1 }); };
+  $('fwd').onclick  = () => { pulse(); send({ delta:  1 }); };
+  $('clock').onclick = () => send({ action: 'reset_timer' });
+
+  // Tap the slide counter to jump anywhere in the deck.
+  $('count').onclick = () => {
+    const list = $('sheetList');
+    list.innerHTML = slides.map((s, i) =>
+      '<li><button type="button" data-i="' + i + '" class="' + (i === index ? 'current' : '') + '">' +
+      '<span class="n">' + (i + 1) + '</span><span>' + escapeHtml(s.title) + '</span></button></li>'
+    ).join('');
+    list.querySelectorAll('button').forEach(b => {
+      b.onclick = () => {
+        send({ index: Number(b.dataset.i) });
+        $('sheet').classList.remove('open');
+      };
+    });
+    $('sheet').classList.add('open');
+  };
+  $('sheetClose').onclick = () => $('sheet').classList.remove('open');
+
+  // Hardware clickers and paired keyboards send page up/down and arrows.
+  addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); $('fwd').click(); }
+    if (['ArrowLeft', 'PageUp'].includes(e.key))         { e.preventDefault(); $('back').click(); }
+  });
+
+  // ---- timer -----------------------------------------------------------
+  setInterval(() => {
+    elapsed++;
+    const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    const s = String(elapsed % 60).padStart(2, '0');
+    const clock = $('clock');
+    clock.textContent = m + ':' + s;
+    clock.classList.toggle('over', elapsed >= 45 * 60);
+  }, 1000);
+
+  // ---- stream ----------------------------------------------------------
+  const source = new EventSource('/api/events');
+
+  source.addEventListener('init', e => {
+    const state = JSON.parse(e.data);
+    slides = state.slides; index = state.index; count = state.count;
+    elapsed = state.elapsed;
+    paint();
+  });
+
+  source.addEventListener('deck', e => {
+    const state = JSON.parse(e.data);
+    slides = state.slides; count = slides.length; index = state.index;
+    paint();
+    pulse();
+  });
+
+  source.addEventListener('slide', e => {
+    index = JSON.parse(e.data).index;
+    paint();
+    // Buzz only when something else moved the deck — Claude Code, or a
+    // second device — so you feel it without looking down.
+    if (Date.now() - selfMove > 900 && navigator.vibrate) navigator.vibrate(18);
+  });
+
+  source.addEventListener('timer', () => { elapsed = 0; });
+
+  source.onopen  = () => { tally.classList.remove('lost'); $('link').textContent = 'live'; };
+  source.onerror = () => { tally.classList.add('lost');    $('link').textContent = 'reconnecting'; };
+
+  // ---- keep the screen awake for the length of the lecture -------------
+  let lock = null;
+  async function keepAwake() {
+    try { lock = await navigator.wakeLock.request('screen'); } catch (_) {}
+  }
+  if ('wakeLock' in navigator) {
+    keepAwake();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') keepAwake();
+    });
+  }
+})();
+</script>
+</body>
+</html>
