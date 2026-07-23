@@ -105,3 +105,13 @@ Open a fresh Colab notebook. Pick a state or basin in India — we'll pull its I
 Note: Live demo next — share the notebook link in chat and follow along. Same rules as always: ask if a cell doesn't make sense before we move on.
 
 Bloom's (Create): Propose a rule for picking a buffer distance other than 33 km for your own basin — what would it depend on, and how would you justify the number you pick?
+
+---
+
+## Open the notebook
+
+<img src="/static/qr-colab.png" alt="QR code to open the notebook in Colab" width="260">
+
+colab.research.google.com/github/anantrajj7-sketch/lecture-deck
+
+Note: QR points straight to "Open in Colab" for imd_gridded_clip_exercise.ipynb on GitHub — scanning it launches a ready-to-run copy, no setup needed. Full link for anyone who'd rather type it: https://colab.research.google.com/github/anantrajj7-sketch/lecture-deck/blob/main/imd_gridded_clip_exercise.ipynb
