@@ -74,13 +74,13 @@ Note: This is the payoff of using xarray instead of a raw array — indexing by 
 
 ---
 
-## The gotchas
+## The pitfalls
 
 - **Colab's disk is temporary** — mount Drive before anything you want to keep
 - **Missing values** — a fill number instead of `NaN`: **−999 for rainfall**, **99.9 for temperature**
 - **No account needed** — IMD's grids download without any login or API key
 
-Note: The fill-value gotcha is the one that silently wrecks an average — it looks like a real number until your mean comes out wildly wrong. Verified against real downloads: get_xarray() does NOT mask either one for you. Rain: millions of raw −999 cells, zero NaNs. Tmax: 222,026 of 351,726 cells were 99.9, zero NaNs. The two variables use different fill values, so a single hardcoded check for -999 silently misses the temperature case — mask by variable.
+Note: The fill-value pitfall is the one that silently wrecks an average — it looks like a real number until your mean comes out wildly wrong. Verified against real downloads: get_xarray() does NOT mask either one for you. Rain: millions of raw −999 cells, zero NaNs. Tmax: 222,026 of 351,726 cells were 99.9, zero NaNs. The two variables use different fill values, so a single hardcoded check for -999 silently misses the temperature case — mask by variable.
 
 Bloom's (Evaluate): Is coding missing values as a fill number (different ones for rain vs. temperature, no less) a good design choice compared to using NaN directly? What does it gain, and what does it put at risk for someone who doesn't know to check?
 
