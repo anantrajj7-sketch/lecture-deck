@@ -98,6 +98,20 @@ Bloom's (Analyze): Why does buffering by 33 km in degrees give a different, wron
 
 ---
 
+## One row per point, not per day
+
+```python
+wide = points_df.pivot(index='time', columns=['lat', 'lon'], values='rain')
+wide = wide.T   # flip it: now one row per grid point, one column per date
+
+wide.to_csv('rain_wide.csv')
+files.download('rain_wide.csv')
+```
+
+Note: points_df is one row per (time, lat, lon) -- "long" format. pivot() reshapes it to one row per date, one column per grid point; .T then flips that to one row per grid point, one column per date -- the layout most people actually expect when they open a CSV in a spreadsheet. Same files.download() pattern as the GeoPackage step: it prompts the browser to save the file locally.
+
+---
+
 ## A 30-year climatology, built the same way
 
 <img src="/static/climatology-map.png" alt="Raster maps of mean annual rainfall and average min/max temperature for Kolhapur district and its 33 km buffer, 1991-2020" width="900">
