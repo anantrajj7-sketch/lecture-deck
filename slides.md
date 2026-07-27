@@ -98,6 +98,16 @@ Bloom's (Analyze): Why does buffering by 33 km in degrees give a different, wron
 
 ---
 
+## A 30-year climatology, built the same way
+
+<img src="/static/climatology-map.png" alt="Maps of mean annual rainfall and average min/max temperature for Pune district and its 33 km buffer, 1991-2020" width="900">
+
+Note: Same pipeline as the notebook (download, mask the fill value, clip to the buffer) but over 1991-2020 -- the WMO's 30-year normal period -- computed once offline rather than live, since it's 90 file downloads instead of 12 (~8 minutes, not seconds). Rainfall is additive, so its map is the MEAN of 30 annual SUMS -- add up each year's daily totals, then average those 30 totals. Temperature isn't additive -- summing daily degrees means nothing physically -- so tmin/tmax are a plain AVERAGE across every day of the 30 years, no summing step. Notice temperature gets only 3 dots to rainfall's 52: the 1 degree vs 0.25 degree resolution gap from the IMD gridded data slide, visible on an actual map for the first time.
+
+Bloom's (Analyze): Why does rainfall get a sum-then-mean treatment here while temperature gets a direct average instead?
+
+---
+
 # Your turn
 
 Open a fresh Colab notebook. Pick a state or basin in India — we'll pull its IMD rainfall grid this session.
