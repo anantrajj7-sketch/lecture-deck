@@ -111,11 +111,11 @@ Bloom's (Analyze): Why does rainfall get a sum-then-mean treatment here while te
 ## Where's the data, where's the gap?
 
 <div style="display:flex;gap:14px;justify-content:center;">
-<img src="/static/nan-rainfall-normal.png" alt="All-India rainfall normal raster with grid points overlaid, showing valid data vs NaN" width="440">
-<img src="/static/nan-tmean-avg.png" alt="All-India average Tmean raster, showing valid data vs NaN" width="440">
+<img src="/static/nan-rainfall-normal.png" alt="All-India rainfall normal raster with NaN cells marked by dim dots" width="440">
+<img src="/static/nan-tmean-avg.png" alt="All-India average Tmean raster with NaN cells marked by dim dots" width="440">
 </div>
 
-Note: Same 1991-2020 data, zoomed out to all of India, to make the pitfalls-slide point visible on an actual map. IMD's grid is a rectangle over India's lat/lon box -- most of that rectangle is ocean, or Pakistan, China, Nepal, Myanmar. Left map: colored boxes plus amber dots mark real data (4964 of 17415 cells, 28.5%); everywhere else is plain dark background -- NaN, not zero, not missing-by-accident, just never had land there. The dots stop exactly at the coastline and borders. Right map: Tmean = (Tmax+Tmin)/2, the standard meteorological approximation for daily mean temperature, averaged directly across all 30 years of daily values (not summed, same rule as always for temperature) -- only 360 of 961 cells (37.5%) on the coarser 1 degree grid, the Himalayan north visibly cooler than the rest of the country.
+Note: Same 1991-2020 data, zoomed out to all of India, to make the pitfalls-slide point visible on an actual map. IMD's grid is a rectangle over India's lat/lon box -- most of that rectangle is ocean, or Pakistan, China, Nepal, Myanmar. Left map: colored boxes are real data (4964 of 17415 cells, 28.5%); the dim dots mark every NaN cell (12451 of them) -- not zero, not missing-by-accident, just never had land there. The dotted stippling stops exactly at the coastline and borders, so India's outline emerges as the clean, undotted shape. Right map: Tmean = (Tmax+Tmin)/2, the standard meteorological approximation for daily mean temperature, averaged directly across all 30 years of daily values (not summed, same rule as always for temperature) -- only 360 of 961 cells (37.5%) on the coarser 1 degree grid, dots for the other 601, Himalayan north visibly cooler than the rest of the country.
 
 ---
 
