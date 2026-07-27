@@ -2,3 +2,9 @@
 __pycache__/
 *.pyc
 .venv/
+
+# Large source GIS files (India-wide) -- stay local, only the small
+# derived static/Data/maharashtra_districts.gpkg is meant to be tracked.
+static/Data/STATE_BOUNDARY.*
+static/Data/DISTRICT_BOUNDARY.*
+static/Data/*.lock
