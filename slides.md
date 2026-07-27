@@ -100,11 +100,22 @@ Bloom's (Analyze): Why does buffering by 33 km in degrees give a different, wron
 
 ## A 30-year climatology, built the same way
 
-<img src="/static/climatology-map.png" alt="Maps of mean annual rainfall and average min/max temperature for Pune district and its 33 km buffer, 1991-2020" width="900">
+<img src="/static/climatology-map.png" alt="Raster maps of mean annual rainfall and average min/max temperature for Kolhapur district and its 33 km buffer, 1991-2020" width="900">
 
-Note: Same pipeline as the notebook (download, mask the fill value, clip to the buffer) but over 1991-2020 -- the WMO's 30-year normal period -- computed once offline rather than live, since it's 90 file downloads instead of 12 (~8 minutes, not seconds). Rainfall is additive, so its map is the MEAN of 30 annual SUMS -- add up each year's daily totals, then average those 30 totals. Temperature isn't additive -- summing daily degrees means nothing physically -- so tmin/tmax are a plain AVERAGE across every day of the 30 years, no summing step. Notice temperature gets only 3 dots to rainfall's 52: the 1 degree vs 0.25 degree resolution gap from the IMD gridded data slide, visible on an actual map for the first time.
+Note: Same pipeline as the notebook (download, mask the fill value, clip to the buffer) but over 1991-2020 -- the WMO's 30-year normal period -- computed once offline rather than live, since it's 90 file downloads instead of 12 (~8 minutes, not seconds). Rainfall is additive, so its map is the MEAN of 30 annual SUMS -- add up each year's daily totals, then average those 30 totals: 36 grid cells here for Kolhapur, ranging 504-4890mm, showing the Western Ghats gradient right at the district's edge. Temperature isn't additive -- summing daily degrees means nothing physically -- so tmin/tmax are a plain AVERAGE across every day of the 30 years, no summing step. Notice temperature is a single 1 degree x 1 degree box, bigger than the whole district -- the resolution gap from the IMD gridded data slide, visible as an honest limitation rather than a bug (labeled directly on the map).
 
 Bloom's (Analyze): Why does rainfall get a sum-then-mean treatment here while temperature gets a direct average instead?
+
+---
+
+## Where's the data, where's the gap?
+
+<div style="display:flex;gap:14px;justify-content:center;">
+<img src="/static/nan-rainfall-normal.png" alt="All-India rainfall normal raster with grid points overlaid, showing valid data vs NaN" width="440">
+<img src="/static/nan-tmean-avg.png" alt="All-India average Tmean raster, showing valid data vs NaN" width="440">
+</div>
+
+Note: Same 1991-2020 data, zoomed out to all of India, to make the pitfalls-slide point visible on an actual map. IMD's grid is a rectangle over India's lat/lon box -- most of that rectangle is ocean, or Pakistan, China, Nepal, Myanmar. Left map: colored boxes plus amber dots mark real data (4964 of 17415 cells, 28.5%); everywhere else is plain dark background -- NaN, not zero, not missing-by-accident, just never had land there. The dots stop exactly at the coastline and borders. Right map: Tmean = (Tmax+Tmin)/2, the standard meteorological approximation for daily mean temperature, averaged directly across all 30 years of daily values (not summed, same rule as always for temperature) -- only 360 of 961 cells (37.5%) on the coarser 1 degree grid, the Himalayan north visibly cooler than the rest of the country.
 
 ---
 
