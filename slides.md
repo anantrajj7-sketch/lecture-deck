@@ -108,6 +108,25 @@ Bloom's (Analyze): Why does rainfall get a sum-then-mean treatment here while te
 
 ---
 
+## Rainfall through 2025, day by day
+
+<div style="text-align:center">
+<video id="rainVid" src="/static/rain-2025.mp4" width="420" loop muted playsinline style="border-radius:8px;border:1px solid #262e39;cursor:pointer" onclick="this.paused?this.play():this.pause()"></video>
+<div style="margin-top:14px;display:flex;gap:10px;justify-content:center;align-items:center;">
+<button onclick="var v=document.getElementById('rainVid');v.paused?v.play():v.pause()" style="background:#1b212a;color:#e8e4da;border:1px solid #262e39;border-radius:6px;padding:8px 16px;font:700 13px 'Archivo',sans-serif;cursor:pointer;">Play / Pause</button>
+<button onclick="var v=document.getElementById('rainVid');v.playbackRate=Math.max(0.25,v.playbackRate-0.25);document.getElementById('speedLbl').textContent=v.playbackRate.toFixed(2)+'x'" style="background:#1b212a;color:#e8e4da;border:1px solid #262e39;border-radius:6px;padding:8px 16px;font:700 13px 'Archivo',sans-serif;cursor:pointer;">− Speed</button>
+<span id="speedLbl" style="color:#f2a93b;font-weight:700;min-width:3.5em;">1.00x</span>
+<button onclick="var v=document.getElementById('rainVid');v.playbackRate=Math.min(4,v.playbackRate+0.25);document.getElementById('speedLbl').textContent=v.playbackRate.toFixed(2)+'x'" style="background:#1b212a;color:#e8e4da;border:1px solid #262e39;border-radius:6px;padding:8px 16px;font:700 13px 'Archivo',sans-serif;cursor:pointer;">+ Speed</button>
+</div>
+<div style="margin-top:8px;"><a href="/static/rain-2025.gif" style="color:#f2a93b;font-size:13px;">Download the .gif instead</a></div>
+</div>
+
+Note: 365 days of real IMD rainfall for 2025, one raster frame per day, same fixed 0-100mm color scale throughout so days are actually comparable. GIFs have no native pause or speed API in a browser, so the player above is a video encoding of the identical frames -- click it or the button to play/pause, use +/- Speed to change playback rate live. The literal .gif file (same 365 frames, ~11MB) is linked below for anyone who wants the file itself rather than the interactive version. Watch the color sweep north and east through June -- that's monsoon onset, visible day by day instead of as one static number.
+
+Bloom's (Understand): Why does the color scale need to stay fixed across all 365 frames instead of auto-scaling to each day's own max value?
+
+---
+
 # Your turn
 
 Open a fresh Colab notebook. Pick a state or basin in India — we'll pull its IMD rainfall grid this session.

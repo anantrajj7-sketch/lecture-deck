@@ -8,3 +8,7 @@ __pycache__/
 static/Data/STATE_BOUNDARY.*
 static/Data/DISTRICT_BOUNDARY.*
 static/Data/*.lock
+
+# Raw IMD .GRD download cache -- large, re-downloadable, kept locally as a
+# backup so repeat analyses don't need to re-fetch from IMD's servers.
+grd_backup/
