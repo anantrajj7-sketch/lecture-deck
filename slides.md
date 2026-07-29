@@ -152,6 +152,22 @@ Bloom's (Understand): Why does the color scale need to stay fixed across all 365
 
 ---
 
+## Real-time rainfall, no archive required
+
+```python
+from datetime import date, timedelta
+import imdlib as imd
+
+yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+data = imd.get_real_data("rain", yesterday, yesterday, file_dir="./")
+```
+
+Note: get_real_data() is get_data()'s near-real-time sibling -- same 0.25 degree binary grid, same -999 fill value, but serving the last few days instead of the 1901-present archive, so it's the call for "how much rain fell yesterday" rather than a historical study. Mask exactly the same way -- ds.where(ds["rain"] > -999.0) -- then pcolormesh over lon/lat with a turbo colormap for a quick all-India map. Full download-to-PNG script is realtime_rainfall.py in the repo root, not on this slide.
+
+Bloom's (Apply): You already have a working get_data() call for 2020-2023. What two arguments change to turn it into a get_real_data() call for just yesterday?
+
+---
+
 # Your turn
 
 Open a fresh Colab notebook. Pick a state or basin in India — we'll pull its IMD rainfall grid this session.
