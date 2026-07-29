@@ -11,17 +11,21 @@ import imdlib as imd
 import matplotlib.pyplot as plt
 
 # ---------------------------------------------------------------
-# 1. Work out yesterday's date in the format imdlib expects
+# 1. Work out yesterday's date
+#    imdlib itself needs YYYY-MM-DD (it feeds this to pd.date_range);
+#    display_date is the DD-MM-YYYY form used for output and the title.
 # ---------------------------------------------------------------
-yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
-print(f"Downloading real-time IMD rainfall for {yesterday}")
+yesterday_dt = date.today() - timedelta(days=1)
+api_date = yesterday_dt.strftime("%Y-%m-%d")
+display_date = yesterday_dt.strftime("%d-%m-%Y")
+print(f"Downloading real-time IMD rainfall for {display_date}")
 
 # ---------------------------------------------------------------
 # 2. Download the real-time data
 #    var_type: "rain" -> daily rainfall @ 0.25 deg resolution
 #    Files are saved into file_dir (current folder here)
 # ---------------------------------------------------------------
-data = imd.get_real_data("rain", yesterday, yesterday, file_dir="./")
+data = imd.get_real_data("rain", api_date, api_date, file_dir="./")
 
 # ---------------------------------------------------------------
 # 3. Convert to an xarray Dataset and mask no-data cells
@@ -45,11 +49,11 @@ mesh = ax.pcolormesh(
 cbar = fig.colorbar(mesh, ax=ax, shrink=0.8, pad=0.02)
 cbar.set_label("Rainfall (mm)")
 
-ax.set_title(f"IMD Daily Rainfall — {yesterday}")
+ax.set_title(f"IMD Daily Rainfall — {display_date}")
 ax.set_xlabel("Longitude (E)")
 ax.set_ylabel("Latitude (N)")
 ax.set_aspect("equal")
 
 plt.tight_layout()
-plt.savefig(f"imd_rainfall_{yesterday}.png", dpi=150)
+plt.savefig(f"imd_rainfall_{display_date}.png", dpi=150)
 plt.show()
